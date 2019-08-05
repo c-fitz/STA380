@@ -1,0 +1,31 @@
+<<<<<<< HEAD
+---
+title: "Hellow World"
+author: "Chris Fitzgerald"
+date: "8/5/2019"
+output:
+  md_document:
+    variant: markdown_github
+---
+
+```{r setup, echo=FALSE}
+
+x <- seq(1,500,2)
+y <- cos(x)
+plot(x,y)
+=======
+---
+title: "Hellow World"
+author: "Chris Fitzgerald"
+date: "8/5/2019"
+output:
+  md_document:
+    variant: markdown_github
+---
+
+```{r setup, include=FALSE}
+x <- seq(1,500,2)
+y <- cos(x)
+plot(x,y)
+>>>>>>> a03bddaea901b6a97fa48ffbc4911f5fa5b1b311
+```
