@@ -1,6 +1,6 @@
 library(tidyverse)
 
-toyimports = read.csv('../data/toyimports.csv')
+toyimports = read.csv('C:/Users/chris/OneDrive/Documents/GitHub/STA380/data/toyimports.csv')
 
 head(toyimports)
 
