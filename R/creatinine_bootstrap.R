@@ -1,6 +1,6 @@
 library(mosaic)
 
-creatinine = read.csv("../data/creatinine.csv", header=TRUE)
+creatinine = read.csv("GitHub/STA380/data/creatinine.csv", header=TRUE)
 head(creatinine)
 
 ### Bootstrapping the sample mean
@@ -10,11 +10,12 @@ mean(creatinine$creatclear)
 
 # OK, 125.25 +/- what?
 # Bootstrap to get a standard error
+# In mosaic resample uses bootstrp
 boot1 = do(1000)*{
   mean(resample(creatinine)$creatclear)
 }
 
-hist(boot1$result)
+hist(boot1$result, 30)
 sd(boot1$result)
 
 # Interpetation: our sample mean is probably off from the true population mean by about 0.95 units

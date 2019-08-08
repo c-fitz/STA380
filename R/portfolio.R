@@ -1,6 +1,6 @@
 library(mosaic)
-library(quantmod)
-library(foreach)
+library(quantmod) # quantitstive models
+library(foreach) # for more sophosticated loops for loops with return values.
 
 # Import a few stocks
 mystocks = c("MRK", "JNJ", "SPY")

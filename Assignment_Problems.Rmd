@@ -1,0 +1,45 @@
+---
+title: "Scott_Exercises"
+author: "Chris Fitzgerald"
+date: "8/7/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(mosaic)
+library(tidyverse)
+library(readr)
+green <- read.csv("GitHub/STA380/data/greenbuildings.csv")
+View(green)
+
+ggplot(data=green) + 
+  geom_histogram(aes(x=age)) +
+  facet_wrap(~green_rating)
+
+green$Bld_Class <- ifelse(green$class_a==1, 'A','B') 
+
+ggplot(data=green) + 
+  geom_histogram(aes(x=age)) +
+  facet_wrap(~Bld_Class)
+
+
+
+```
+
+```{r}
+
+ggplot(data=green) + 
+  geom_histogram(aes(x=leasing_rate, bin=10)) +
+  facet_wrap(~green_rating)
+
+
+ggplot(data=green) + 
+  geom_histogram(aes(x=leasing_rate, bin=10)) +
+  facet_wrap(~Bld_Class)
+
+
+
+
+```
+
+
