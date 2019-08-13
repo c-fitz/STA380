@@ -1,5 +1,5 @@
 # Protein first
-protein = read.csv("../data/protein.csv", row.names=1)
+protein = read.csv("C:/Users/chris/OneDrive/Documents/GitHub/STA380/data/protein.csv", row.names=1)
 
 # Center/scale the data
 protein_scaled = scale(protein, center=TRUE, scale=TRUE) 

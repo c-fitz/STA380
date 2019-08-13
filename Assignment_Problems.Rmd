@@ -9,17 +9,31 @@ output: html_document
 library(mosaic)
 library(tidyverse)
 library(readr)
-green <- read.csv("GitHub/STA380/data/greenbuildings.csv")
-View(green)
+library(ggplot2)
+library(LICORS)  # for kmeans++
+library(foreach)
+library(mvtnorm)
 
+green <- read.csv("C:/Users/Chris/OneDrive/Documents/GitHub/STA380/data/greenbuildings.csv")
+green$Bld_Class <- ifelse(green$class_a==1, 'A','B') 
+
+#green <- read.csv("greenbuildings.csv")
+View(green)
+```
+
+
+# Exercise 1
+Green Buildings
+
+```{r}
 ggplot(data=green) + 
   geom_histogram(aes(x=age)) +
   facet_wrap(~green_rating)
 
-green$Bld_Class <- ifelse(green$class_a==1, 'A','B') 
+
 
 ggplot(data=green) + 
-  geom_histogram(aes(x=age)) +
+  geom_histogram(aes(x=age), color=renovated) +
   facet_wrap(~Bld_Class)
 
 
@@ -34,12 +48,664 @@ ggplot(data=green) +
 
 
 ggplot(data=green) + 
-  geom_histogram(aes(x=leasing_rate, bin=10)) +
+  geom_histogram(aes(x=leasing_rate)) +
   facet_wrap(~Bld_Class)
 
 
 
 
 ```
+
+```{r}
+
+ggplot(data = green) + 
+  geom_point(mapping = aes(x = empl_gr, y = Rent, color = renovated))
+```
+
+
+# Exercise 2
+Austin-Bergstrom Interational Airport
+
+
+
+```{r}
+df <- read.csv("C:/Users/Chris/OneDrive/Documents/GitHub/STA380/data/ABIA.csv")
+names(df)
+
+```
+
+
+
+
+```{r}
+
+ggplot(data = df) + 
+  geom_point(mapping = aes(x = empl_gr, y = Rent, color = renovated)) +
+  facet_wrap(~Bld_Class)
+
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+# Exercise 3
+
+
+```{r}
+library(mosaic)
+library(quantmod) # quantitstive models
+library(foreach) # for more sophosticated loops for loops with return values.
+
+
+#### Now use a bootstrap approach
+#### With more efts
+
+myefts = c("CSM", "QAI", "HDG") # Long-Short EFTs
+
+myprices = getSymbols(myefts, from = "2014-08-07")
+
+
+# A chunk of code for adjusting all efts
+# creates a new object adding 'a' to the end
+# For example, WMT becomes WMTa, etc
+for(ticker in myefts) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+head(CSMa)
+
+# Combine all the returns in a matrix long - Short
+all_returns = cbind(	ClCl(CSMa),
+								ClCl(QAIa),
+								ClCl(HDGa))
+head(all_returns)
+all_returns = as.matrix(na.omit(all_returns))
+
+# Compute the returns from the closing prices
+pairs(all_returns)
+
+set.seed(47)
+# Now loop over two trading weeks
+total_wealth = 100000
+weights = c(0.3,0.4,0.3)
+holdings = weights * total_wealth
+n_days = 20
+wealthtracker = rep(0, n_days) # Set up a placeholder to track total wealth
+for(today in 1:n_days) {
+	return.today = resample(all_returns, 1, orig.ids=FALSE)
+	holdings = holdings + holdings*return.today
+	total_wealth = sum(holdings)
+	wealthtracker[today] = total_wealth
+	weights = c(0.3,0.4,0.3)
+  holdings = weights * total_wealth
+}
+total_wealth
+plot(wealthtracker, type='l')
+
+initial_wealth = 100000
+sim1 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.3,0.4,0.3)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+		weights = c(0.3,0.4,0.3)
+	  holdings = weights * total_wealth
+	}
+	wealthtracker
+}
+
+# Profit/loss
+mean(sim1[,n_days])
+hist(sim1[,n_days]- initial_wealth, breaks=30)
+
+quantile(sim1[,n_days]- initial_wealth, 0.05)
+
+
+
+
+```
+
+
+
+
+
+```{r}
+
+myefts = c("RSX", "FM", "ERUS", "GREK", "PIE") # Emerging Markets
+myprices = getSymbols(myefts, from = "2014-08-07")
+
+for(ticker in myefts) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+all_returns = cbind(	ClCl(RSXa),
+								ClCl(FMa),
+								ClCl(ERUSa),
+								ClCl(GREKa),
+								ClCl(PIEa))
+head(all_returns)
+all_returns = as.matrix(na.omit(all_returns))
+
+set.seed(55)
+# Now loop over two trading weeks
+total_wealth = 100000
+weights = c(0.2,0.3,0.2,0.2,0.1)
+holdings = weights * total_wealth
+n_days = 20
+wealthtracker = rep(0, n_days) # Set up a placeholder to track total wealth
+for(today in 1:n_days) {
+	return.today = resample(all_returns, 1, orig.ids=FALSE)
+	holdings = holdings + holdings*return.today
+	total_wealth = sum(holdings)
+	wealthtracker[today] = total_wealth
+	#weights = c(0.2,0.3,0.2,0.2,0.1)
+  #holdings = weights * total_wealth
+}
+total_wealth
+plot(wealthtracker, type='l')
+
+initial_wealth = 100000
+sim1 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.2,0.3,0.2,0.2,0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+		weights = c(0.2,0.3,0.2,0.2,0.1)
+	  holdings = weights * total_wealth
+	}
+	wealthtracker
+}
+
+# Profit/loss
+mean(sim1[,n_days])
+hist(sim1[,n_days]- initial_wealth, breaks=30)
+
+quantile(sim1[,n_days]- initial_wealth, 0.05)
+
+
+```
+
+
+
+
+
+```{r}
+
+myefts = c("MDIV", "YYY", "AOM", "AOA", "GAL", "GCE") # Diversifying
+myprices = getSymbols(myefts, from = "2014-08-07")
+
+
+for(ticker in myefts) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+all_returns = cbind(	ClCl(MDIVa),
+								ClCl(YYYa),
+								ClCl(AOMa),
+								ClCl(AOAa),
+								ClCl(GALa),
+								ClCl(GCEa))
+head(all_returns)
+all_returns = as.matrix(na.omit(all_returns))
+
+set.seed(60)
+# Now loop over two trading weeks
+total_wealth = 100000
+weights = c(0.2,0.2,0.1,0.2,0.2,0.1)
+holdings = weights * total_wealth
+n_days = 20
+wealthtracker = rep(0, n_days) # Set up a placeholder to track total wealth
+for(today in 1:n_days) {
+	return.today = resample(all_returns, 1, orig.ids=FALSE)
+	holdings = holdings + holdings*return.today
+	total_wealth = sum(holdings)
+	wealthtracker[today] = total_wealth
+	weights = c(0.2,0.2,0.1,0.2,0.2,0.1)
+  holdings = weights * total_wealth
+}
+total_wealth
+plot(wealthtracker, type='l')
+
+initial_wealth = 100000
+sim1 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.2, 0.2, 0.1, 0.2, 0.2, 0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+		weights = c(0.2, 0.2, 0.1, 0.2, 0.2, 0.1)
+	  holdings = weights * total_wealth
+	}
+	wealthtracker
+}
+
+head(sim1)
+hist(sim1[,n_days], 25)
+
+# Profit/loss
+mean(sim1[,n_days])
+hist(sim1[,n_days]- initial_wealth, breaks=30)
+
+quantile(sim1[,n_days]- initial_wealth, 0.05)
+
+```
+
+
+
+# Excersise 4 (Marketing Segmentation)
+
+```{r}
+
+
+
+sm <- read.csv("C:/Users/Chris/OneDrive/Documents/GitHub/STA380/data/social_marketing.csv")
+
+smna <- colSums(sm[,-1])
+
+#X = sm[,c(10,17,20,24,33)]
+X = sm[,c(17,20,24,33)]
+X = scale(X, center=TRUE, scale=TRUE)
+
+# Extract the centers and scales from the rescaled data (which are named attributes)
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+
+set.seed(47)
+clust1 = kmeans(X, 5, nstart=25)
+
+clust1$center[1,]*sigma + mu
+clust1$center[2,]*sigma + mu
+clust1$center[3,]*sigma + mu 
+clust1$center[4,]*sigma + mu
+clust1$center[5,]*sigma + mu #Health and nutrition with personal fitness
+
+# Form a pairwise distance matrix using the dist function
+X_matrix = dist(X, method='euclidean')
+
+
+# Now run hierarchical clustering
+hier_X = hclust(X_matrix, method='average')
+
+
+# Plot the dendrogram
+plot(hier_X, cex=0.8)
+
+# Cut the tree into 5 clusters
+cluster1 = cutree(hier_X, k=5)
+summary(factor(cluster1))
+
+
+c3 = cutree(hier_X, 4)
+D3 = data.frame(X, z = c3)
+#personal_fitness
+#Health_nutrition
+#outdoors
+#cooking
+
+# Positive relationships - Outdoors, Personal_fitness, Health & nutrition
+ggplot(D3) + geom_point(aes(x=health_nutrition, y=outdoors, col=factor(z)))
+ggplot(D3) + geom_point(aes(x=health_nutrition, y=personal_fitness, col=factor(z)))
+ggplot(D3) + geom_point(aes(x=health_nutrition, y=cooking, col=factor(z)))
+ggplot(D3) + geom_point(aes(x=cooking, y=personal_fitness, col=factor(z)))
+ggplot(D3) + geom_point(aes(x=cooking, y=outdoors, col=factor(z)))
+ggplot(D3) + geom_point(aes(x=outdoors, y=personal_fitness, col=factor(z)))
+
+# Examine the cluster members
+#which(cluster1 == 1)
+#which(cluster1 == 2)
+#which(cluster1 == 3)
+
+
+# Using max ("complete") linkage instead
+#hier_protein2 = hclust(protein_distance_matrix, method='single')
+
+# Plot the dendrogram
+#plot(hier_protein2, cex=0.8)
+#cluster2 = cutree(hier_protein2, k=5)
+#summary(factor(cluster2))
+
+# Examine the cluster members
+#which(cluster2 == 1)
+#which(cluster2 == 2)
+#which(cluster2 == 3)
+
+
+```
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

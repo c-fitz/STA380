@@ -8,6 +8,7 @@ cars = read.csv('../data/cars.csv', header=TRUE)
 summary(cars)
 
 # Center and scale the data
+# good practice for kmeans is scaling the data
 X = cars[,-(1:9)]
 X = scale(X, center=TRUE, scale=TRUE)
 

@@ -14,6 +14,7 @@ SPYa = adjustOHLC(SPY)
 # Look at close-to-close changes
 plot(ClCl(MRKa))
 
+# Volatility is predictable.
 # Combine close to close changes in a single matrix
 all_returns = cbind(ClCl(MRKa),ClCl(JNJa),ClCl(SPYa))
 head(all_returns)
@@ -121,4 +122,14 @@ hist(sim1[,n_days], 25)
 # Profit/loss
 mean(sim1[,n_days])
 hist(sim1[,n_days]- initial_wealth, breaks=30)
+
+# quantile(object, percentage)
+
+# quantile(sim1[,n_days]- initial_wealth, 0.05)
+
+# Scale of data should match time interval, 10 days - use daily, 3 months - use months, 20 years - use years.
+
+# you can bias data by what data is selected. Do not cherry pick, you want the data to cover a wide range of experiences.
+
+# 
 
