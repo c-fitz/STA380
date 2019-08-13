@@ -1,3 +1,4 @@
+library(ggplot2)
 # Load a toy data and peak at the numbers
 data(iris)
 head(iris)
@@ -47,7 +48,7 @@ hist(alpha, 25, xlim=c(-3,3), main=round(var(alpha), 2))
 
 # Compare these random projections to the first PC
 pc1 = prcomp(Z_std)
-v_best = pc1$rotation[,1]
+v_best = pc1$rotation[,1] # first column is most important 
 v_best
 slope_best = v_best[2]/v_best[1]  # intercept = 0, slope = rise/run
 
