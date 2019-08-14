@@ -329,9 +329,6 @@ quantile(sim1[,n_days]- initial_wealth, 0.05)
 # Excersise 4 (Marketing Segmentation)
 
 ```{r}
-
-
-
 sm <- read.csv("C:/Users/Chris/OneDrive/Documents/GitHub/STA380/data/social_marketing.csv")
 
 smna <- colSums(sm[,-1])
@@ -384,32 +381,108 @@ ggplot(D3) + geom_point(aes(x=cooking, y=personal_fitness, col=factor(z)))
 ggplot(D3) + geom_point(aes(x=cooking, y=outdoors, col=factor(z)))
 ggplot(D3) + geom_point(aes(x=outdoors, y=personal_fitness, col=factor(z)))
 
-# Examine the cluster members
-#which(cluster1 == 1)
-#which(cluster1 == 2)
-#which(cluster1 == 3)
-
-
-# Using max ("complete") linkage instead
-#hier_protein2 = hclust(protein_distance_matrix, method='single')
-
-# Plot the dendrogram
-#plot(hier_protein2, cex=0.8)
-#cluster2 = cutree(hier_protein2, k=5)
-#summary(factor(cluster2))
-
-# Examine the cluster members
-#which(cluster2 == 1)
-#which(cluster2 == 2)
-#which(cluster2 == 3)
 
 
 ```
 
 
+for (i in 1:nrow(sm)){
+if (sm[i,33] > 5){
+  if (sm[i,17]> 5){
+    if(sm[i,20] > 5){
+      if(sm[i,24]  > 5) {
+        sm$Label[i] <- 'Fit_Food' #'PF_HN_C_OD'
+      }else{
+        sm$Label[i] <- 'Fit_Food' #'PF_HN_C'
+      }
+    }else{
+        sm$Label[i] <- 'Fit_Food' #'PF_HN'
+      }
+  }else{
+        sm$Label[i] <- 'Fit_Food' #'PF'
+      }
+}else{
+        sm$Label[i] <- 'Other'
+      }
+}    
 
+
+for (i in 1:nrow(sm)){
+if (sm[i,33] > 5 || sm[i,17]> 5 || sm[i,20] > 5 || sm[i,24] > 5){
+        sm$Label[i] <- 'Fit_Food' #'PF_HN_C_OD'
+}else{
+        sm$Label[i] <- 'Other'
+      }
+}  
+
+
+
+### USe this:
+
+for (i in 1:nrow(sm)){
+if (sm[i,33] > 6 || sm[i,17] > 5 ){
+        sm$Label[i] <- 'Fit_Food' #'PF_HN_C_OD'
+}else{
+        sm$Label[i] <- 'Other'
+      }
+}   
+
+830
 
 ```{r}
+
+sm <- read.csv("C:/Users/Chris/OneDrive/Documents/GitHub/STA380/data/social_marketing.csv")
+# PCA
+sm <- sm[,-38]
+sm$Label <- NULL
+for (i in 1:nrow(sm)){
+if (sm[i,33] > 6 || sm[i,17] > 5){
+        sm$Label[i] <- 'Fit_Food' #'PF_HN_C_OD'
+}else{
+        sm$Label[i] <- 'Other'
+      }
+}    
+
+
+sm.pca <- sm[,-c(1,38)]
+
+
+Z = sm.pca/rowSums(sm.pca)
+
+# PCA
+set.seed(357)
+pc2 = prcomp(Z, scale=TRUE, rank=5)
+loadings = pc2$rotation
+scores = pc2$x
+summary(pc2)
+
+qplot(scores[,2], scores[,1],  color = sm$Label, xlab='Component 2', ylab='Component 1')
+qplot(scores[,3], scores[,1],  color = sm$Label, xlab='Component 3', ylab='Component 1')
+qplot(scores[,2], scores[,3],  color = sm$Label, xlab='Component 2', ylab='Component 3')
+qplot(scores[,2], scores[,4],  color = sm$Label, xlab='Component 2', ylab='Component 4')
+qplot(scores[,2], scores[,5],  color = sm$Label, xlab='Component 2', ylab='Component 5')
+qplot(scores[,4], scores[,1],  color = sm$Label, xlab='Component 4', ylab='Component 1')
+qplot(scores[,5], scores[,1],  color = sm$Label, xlab='Component 5', ylab='Component 1')
+qplot(scores[,3], scores[,5],  color = sm$Label, xlab='Component 3', ylab='Component 5')
+qplot(scores[,3], scores[,4],  color = sm$Label, xlab='Component 3', ylab='Component 4')
+qplot(scores[,5], scores[,4],  color = sm$Label, xlab='Component 5', ylab='Component 4')
+
+
+D_SM = dist(scores[,1:5])
+set.seed(357)
+hclust_SM = hclust(D_SM, method='average')
+plot(hclust_SM)
+c3 = cutree(hclust_SM, 6)
+D3 = data.frame(sm, z = c3)
+
+count(D3$Label == "Fit_Food")/nrow(D3)
+
+count(D3$Label == "Fit_Food")/(count(D3$z == 1))
+count(D3$z == 1)
+
+table(D3[D3$Label == "Fit_Food",]$z)
+
+(table(D3[D3$Label=='Fit_Food',]$z))/(table(D3$z))
 
 ```
 
